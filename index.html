@@ -1,129 +1,50 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le Royaume des Cendres</title>
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Le Royaume des Cendres — RPG</title>
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#080b0b;color:#e5dfcc;font-family:Georgia,serif;overflow:hidden}
-#wrap{position:relative;width:100vw;height:100vh;background:#111}canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
-#hud{position:absolute;inset:0;pointer-events:none;text-shadow:0 2px 5px #000}
-.panel{background:linear-gradient(135deg,rgba(12,17,16,.92),rgba(25,25,21,.78));border:1px solid #71674b;box-shadow:0 0 20px #0008;padding:12px 15px}
-#brand{position:absolute;top:16px;left:16px;font-size:22px;letter-spacing:3px;color:#d4c39a}#stats{position:absolute;top:58px;left:16px;width:210px}
-.bar{height:9px;background:#271c1b;border:1px solid #59453b;margin:5px 0 9px}.fill{height:100%;width:100%;background:#9b3930;transition:width .15s}
-#quest{position:absolute;top:16px;right:16px;width:255px;font-size:14px;line-height:1.5}#quest strong{color:#d9bf7e;letter-spacing:1px}
-#hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#e0d7bf;font:13px Arial,sans-serif;background:#080b0bd9;padding:9px 14px;border:1px solid #504b3b}
-#dialog{display:none;position:absolute;bottom:70px;left:50%;transform:translateX(-50%);width:min(600px,90vw);pointer-events:auto;line-height:1.5}
-#dialog h3{margin:0 0 8px;color:#d8be7c}#dialog p{margin:0 0 10px}button{font:inherit;background:#302b20;color:#f1e5c4;border:1px solid #a18b58;padding:7px 12px;cursor:pointer}button:hover{background:#51432a}
-#toast{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:20px;color:#e7d49e;opacity:0;transition:opacity .3s;text-align:center}
-#mapname{position:absolute;bottom:60px;right:18px;font-size:12px;color:#b7b09b;letter-spacing:2px}
-@media(max-width:600px){#quest{width:180px;font-size:12px}#brand{font-size:16px}#stats{width:155px}#hint{font-size:11px;white-space:normal;width:94%;text-align:center}}
-</style>
-</head>
-<body><div id="wrap">
-<canvas id="game"></canvas>
-<div id="hud">
-<div id="brand">LE ROYAUME DES CENDRES</div>
-<div id="stats" class="panel"><div>VIE <span id="hpnum">100</span>/100</div><div class="bar"><div id="hp" class="fill"></div></div><div>ÉCLATS : <span id="souls">0</span></div><div style="font-size:12px;color:#aaa18b">Niveau 1 · L'Exilé</div></div>
-<div id="quest" class="panel"><strong>JOURNAL DE QUÊTE</strong><hr style="border-color:#62573d"><div id="questtext">Parlez à la sentinelle près du feu.</div><p style="color:#a9a08c;font-size:12px">La brume dévore les terres du royaume...</p></div>
-<div id="hint">ZQSD / WASD : se déplacer · ESPACE : attaquer · E : parler / examiner · MAJ : esquiver</div>
-<div id="dialog" class="panel"><h3 id="dtitle">Sentinelle</h3><p id="dtext"></p><button id="dnext">Continuer [E]</button></div>
-<div id="toast"></div><div id="mapname">LES TERRES OUBLIÉES</div>
-</div></div>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#090b0b;color:#e9dfc5;font-family:Georgia,serif;overflow:hidden}#game{width:100vw;height:100vh;display:block;image-rendering:pixelated;image-rendering:crisp-edges}#hud{position:fixed;inset:0;pointer-events:none;text-shadow:0 2px 4px #000}#logo{position:absolute;top:18px;left:22px;color:#ddc995;letter-spacing:3px;font-size:clamp(14px,2vw,22px)}.panel{background:linear-gradient(145deg,#101713ed,#171713df);border:1px solid #6e6346;box-shadow:0 6px 25px #0008;padding:12px 15px;backdrop-filter:blur(3px)}#stats{position:absolute;top:55px;left:20px;width:205px;font:12px Arial,sans-serif;letter-spacing:1px}#stats b{color:#e7d8b3} .bar{height:8px;background:#291a18;border:1px solid #594039;margin:6px 0 11px}.fill{height:100%;background:#a63b35;width:100%;transition:width .15s}#quest{position:absolute;top:20px;right:20px;width:260px;font-size:13px;line-height:1.55}#quest strong{color:#d8c184;letter-spacing:2px}#quest hr{border:0;border-top:1px solid #655b41}#hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#080b0be8;border:1px solid #5b523d;padding:10px 15px;font:12px Arial,sans-serif;color:#e4dbc4}#place{position:absolute;right:20px;bottom:20px;color:#c0b59b;font-size:11px;letter-spacing:3px}#dialog{display:none;position:absolute;bottom:72px;left:50%;transform:translateX(-50%);width:min(620px,92vw);pointer-events:auto;line-height:1.55}#dialog h3{margin:0 0 8px;color:#e0c783;font-weight:normal;letter-spacing:1px}#dialog p{margin:0 0 12px}button{font:13px Georgia;background:#302b20;color:#f1e5c4;border:1px solid #a18b58;padding:9px 14px;cursor:pointer}button:hover{background:#51432a}#toast{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);color:#ead39a;font-size:18px;opacity:0;transition:opacity .25s;text-align:center;max-width:80vw}#start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse,#17211bdc,#070908f5);z-index:5;text-align:center}#start .card{max-width:620px;margin:20px;padding:35px;border:1px solid #716448;background:#0b100ee8;box-shadow:0 0 80px #000}#start h1{font-size:clamp(28px,5vw,52px);font-weight:normal;letter-spacing:4px;color:#d8c28c;margin:0 0 8px}#start p{color:#b8b19d;line-height:1.7}#start button{font-size:16px;padding:12px 25px;margin-top:12px}@media(max-width:650px){#quest{top:12px;right:12px;width:175px;font-size:11px;padding:9px}#logo{top:12px;left:12px;font-size:12px;letter-spacing:1px}#stats{left:12px;top:43px;width:145px;padding:9px;font-size:10px}#hint{white-space:normal;width:94%;text-align:center;bottom:12px;font-size:10px}#place{display:none}}
+</style></head><body>
+<canvas id="game"></canvas><div id="hud"><div id="logo">LE ROYAUME DES CENDRES</div>
+<div id="stats" class="panel"><b>VITALITÉ</b> <span id="hpnum">100</span> / 100<div class="bar"><div id="hp" class="fill"></div></div><b>ÉCLATS ANCIENS</b> <span id="souls">0</span><p style="color:#a69d87;margin:9px 0 0">L'Exilé · Niveau I</p></div>
+<div id="quest" class="panel"><strong>JOURNAL DE QUÊTE</strong><hr><div id="questtext">Parlez à Maëlys, près du feu mourant.</div><p style="color:#a9a08c;font-size:11px">La brume s'épaissit. Les morts se souviennent.</p></div>
+<div id="hint">ZQSD / WASD : marcher · ESPACE : frapper · E : parler / examiner · MAJ : esquive</div><div id="place">LES TERRES OUBLIÉES</div><div id="toast"></div>
+<div id="dialog" class="panel"><h3 id="dtitle">Maëlys, la sentinelle</h3><p id="dtext"></p><button id="dnext">Continuer [E]</button></div></div>
+<div id="start"><div class="card"><h1>LES CENDRES</h1><div style="letter-spacing:5px;color:#988867">UN ROYAUME OUBLIÉ</div><p>La couronne est tombée. Les cloches sonnent sous la terre et quelque chose remue dans les ruines.<br>Vous n'êtes qu'une lame dans les ténèbres — pour l'instant.</p><p style="font-size:12px">EXPLORATION · COMBATS · QUÊTES · PERSONNAGES</p><button id="begin">ENTRER DANS LE ROYAUME</button></div></div>
 <script>
-(() => {
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-let W=innerWidth,H=innerHeight,dpr=1;
-function resize(){W=innerWidth;H=innerHeight;canvas.width=Math.floor(W*.72);canvas.height=Math.floor(H*.72);ctx.imageSmoothingEnabled=false;}resize();addEventListener('resize',resize);
-const world={w:1800,h:1300};
-const player={x:850,y:690,hp:100,maxhp:100,dir:0,attack:0,dodge:0,inv:0};
-let souls=0,dialogOpen=false,quest=0,toastTimer=0;
-const npcs=[{x:900,y:560,name:'Maëlys, la sentinelle',kind:'npc',said:false},{x:1160,y:810,name:'Marchand silencieux',kind:'merchant',said:false}];
-const enemies=[
-{x:660,y:480,type:'squelette',hp:45,max:45,speed:34,aggro:220,hit:0},
-{x:1240,y:590,type:'squelette',hp:45,max:45,speed:30,aggro:220,hit:0},
-{x:1320,y:970,type:'troll',hp:130,max:130,speed:20,aggro:280,hit:0},
-{x:530,y:920,type:'squelette',hp:45,max:45,speed:33,aggro:210,hit:0}
-];
-const obstacles=[
-{x:750,y:580,w:75,h:48,t:'ruin'},{x:1010,y:500,w:100,h:55,t:'ruin'},
-{x:1090,y:680,w:55,h:80,t:'tree'},{x:690,y:800,w:65,h:85,t:'tree'},
-{x:1450,y:690,w:80,h:90,t:'tree'},{x:410,y:650,w:80,h:90,t:'tree'},
-{x:1020,y:1020,w:90,h:55,t:'ruin'},{x:860,y:380,w:55,h:70,t:'tree'},
-{x:1360,y:420,w:70,h:90,t:'tree'},{x:570,y:610,w:50,h:55,t:'rock'}
-];
-const keys={};addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(k==='e')interact();if(k===' '&&!dialogOpen)attack();if(k==='shift')player.dodge=.25;});
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function notify(t){let el=document.getElementById('toast');el.textContent=t;el.style.opacity=1;toastTimer=2.2}
-function updateQuest(){let q=['Parlez à Maëlys près du feu.','Éliminez les squelettes qui rôdent dans les ruines.','Retournez voir Maëlys.','La sentinelle vous a confié un nouvel objectif : explorez les terres maudites.'];document.getElementById('questtext').textContent=q[Math.min(quest,3)];}
-function showDialog(title,text,callback){dialogOpen=true;document.getElementById('dialog').style.display='block';document.getElementById('dtitle').textContent=title;document.getElementById('dtext').textContent=text;document.getElementById('dnext').onclick=()=>{document.getElementById('dialog').style.display='none';dialogOpen=false;if(callback)callback();};}
-function interact(){
- if(dialogOpen){document.getElementById('dnext').click();return}
- let near=npcs.find(n=>dist(player,n)<95);
- if(near){if(near.kind==='npc'){if(quest===0){showDialog(near.name,"Voyageur... la brume a réveillé les morts. Trois squelettes hantent ces ruines. Débarrassez-nous d'eux, et je vous révélerai ce qui est arrivé au roi.",()=>{quest=1;updateQuest();notify('Nouvelle quête : Les morts sans repos');});}else if(quest===1){showDialog(near.name,"Les morts sont toujours là. Suivez les sentiers, gardez votre lame prête.");}else if(quest===2){showDialog(near.name,"Vous avez fait ce que les soldats n'ont pas osé faire. Prenez ces éclats anciens. Au nord, un troll garde le chemin du sanctuaire.",()=>{souls+=25;quest=3;document.getElementById('souls').textContent=souls;updateQuest();notify('25 éclats anciens obtenus');});}else showDialog(near.name,"Le sanctuaire au nord cache la vérité sur la chute du royaume.");}
- else showDialog(near.name,"Je n'ai presque plus rien à vendre. Les routes sont devenues trop dangereuses.");return;}
- let e=enemies.find(e=>e.hp>0&&dist(player,e)<90);
- if(e){notify(e.type==='troll'?'Un troll massif vous barre la route.':'Un squelette couvert de poussière.');return}
-}
-function attack(){if(player.attack>0)return;player.attack=.28;let hits=enemies.filter(e=>e.hp>0&&dist(player,e)<95);for(const e of hits){e.hp-=e.type==='troll'?22:30;e.hit=.18;if(e.hp<=0){souls+=e.type==='troll'?15:5;document.getElementById('souls').textContent=souls;notify(e.type==='troll'?'Le troll s’effondre.':'Le squelette se brise en poussière.');}}
-if(quest===1&&enemies.filter(e=>e.type==='squelette'&&e.hp>0).length===0){quest=2;updateQuest();notify('Objectif accompli : retournez voir Maëlys.');}}
-function moveEntity(e,dx,dy){e.x=Math.max(30,Math.min(world.w-30,e.x+dx));e.y=Math.max(30,Math.min(world.h-30,e.y+dy));}
-function update(dt){
- if(!dialogOpen){
- let dx=0,dy=0;if(keys['w']||keys['z']||keys['arrowup'])dy--;if(keys['s']||keys['arrowdown'])dy++;if(keys['a']||keys['q']||keys['arrowleft'])dx--;if(keys['d']||keys['arrowright'])dx++;
- if(dx||dy){let l=Math.hypot(dx,dy);dx/=l;dy/=l;player.dir=Math.atan2(dy,dx);let speed=player.dodge>0?390:175;moveEntity(player,dx*speed*dt,dy*speed*dt);}
- }
- player.attack=Math.max(0,player.attack-dt);player.dodge=Math.max(0,player.dodge-dt);player.inv=Math.max(0,player.inv-dt);
- enemies.forEach(e=>{if(e.hp<=0)return;e.hit=Math.max(0,e.hit-dt);let d=dist(player,e);if(d<e.aggro&&d>42&&!dialogOpen){let dx=(player.x-e.x)/d,dy=(player.y-e.y)/d;moveEntity(e,dx*e.speed*dt,dy*e.speed*dt);}if(d<47&&e.hit<=0&&player.inv<=0){player.hp=Math.max(0,player.hp-(e.type==='troll'?15:8));player.inv=.8;e.hit=.7;document.getElementById('hpnum').textContent=player.hp;document.getElementById('hp').style.width=player.hp+'%';if(player.hp===0){showDialog('Vous êtes tombé dans les ténèbres','La brume vous a englouti. Recommencer ?',()=>{player.hp=100;player.x=850;player.y=690;enemies.forEach(e=>e.hp=e.max);document.getElementById('hpnum').textContent=100;document.getElementById('hp').style.width='100%';});}}});
- }
- if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)document.getElementById('toast').style.opacity=0}
-}
-function polygon(points,fill,stroke){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
-function ellipse(x,y,rx,ry,color){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
-function drawTree(x,y,s=1){ellipse(x,y+10*s,25*s,9*s,'#080d0b99');polygon([[x-7*s,y],[x-4*s,y-38*s],[x+5*s,y-40*s],[x+8*s,y]],'#342c25');for(let i=0;i<3;i++){let yy=y-24*s-i*16*s;polygon([[x,yy-25*s],[x-24*s,yy+8*s],[x+25*s,yy+8*s]],i===1?'#26352d':'#1a2823','#394335');}}
-function drawRuin(x,y,w,h){ctx.fillStyle='#393a32';ctx.fillRect(x-w/2,y-h,w,h);ctx.fillStyle='#252a25';ctx.fillRect(x-w/2+7,y-h+8,w-14,h-8);for(let i=1;i<4;i++){ctx.fillStyle='#555346';ctx.fillRect(x-w/2,y-h+i*12,w,2)}}
-function drawCharacter(x,y,type,scale=1,dir=0){
- ellipse(x,y+12*scale,14*scale,6*scale,'#05080799');
- if(type==='player'){
- ctx.save();ctx.translate(x,y);ctx.rotate(dir*.08);
- polygon([[-10*scale,3*scale],[0,-15*scale],[10*scale,3*scale],[7*scale,12*scale],[-7*scale,12*scale]],'#383e3d','#858477');
- polygon([[-9*scale,-5*scale],[0,-23*scale],[9*scale,-5*scale]],'#202624');
- ellipse(0,-19*scale,6*scale,7*scale,'#aaa99a');polygon([[-5*scale,-22*scale],[0,-30*scale],[5*scale,-22*scale]],'#74786d');
- ctx.strokeStyle='#b8b9a4';ctx.lineWidth=3*scale;ctx.beginPath();ctx.moveTo(9*scale,-4*scale);ctx.lineTo(19*scale,-22*scale);ctx.stroke();
- if(player.attack>0){ctx.strokeStyle='#e0d6a0';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,-3*scale,36*scale,-1.4,1.1);ctx.stroke();}
- ctx.restore();
- }else if(type==='squelette'){
- ellipse(x,y-8*scale,9*scale,12*scale,'#aaa995');ellipse(x-3*scale,y-9*scale,2*scale,3*scale,'#282b25');ellipse(x+3*scale,y-9*scale,2*scale,3*scale,'#282b25');
- polygon([[x-9*scale,y],[x+9*scale,y],[x+7*scale,y+15*scale],[x-7*scale,y+15*scale]],'#6d7064');ctx.strokeStyle='#b0ad98';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+8,y);ctx.lineTo(x+15,y-14);ctx.stroke();
- }else{polygon([[x-17,y+9],[x-14,y-15],[x-7,y-28],[x+9,y-26],[x+19,y-7],[x+16,y+12]],'#4a5541','#73775a');ellipse(x+1,y-22,10,8,'#626952');ellipse(x-3,y-23,2,2,'#c39a51');ellipse(x+5,y-23,2,2,'#c39a51');}
- if(type!=='player'&&type!=='npc'){ctx.fillStyle='#171514';ctx.fillRect(x-16,y-38,32,4);ctx.fillStyle='#9d4135';ctx.fillRect(x-16,y-38,32*Math.max(0, type==='troll'?enemies.find(e=>e.type===type&&Math.abs(e.x-x)<2)?.hp/130||0:1),4);}
-}
-function render(){
- let scaleX=canvas.width/W,scaleY=canvas.height/H;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
- let camX=Math.max(0,Math.min(world.w-W,player.x-W/2)),camY=Math.max(0,Math.min(world.h-H,player.y-H/2));
- ctx.scale(scaleX,scaleY);ctx.save();ctx.translate(-camX,-camY);
- ctx.fillStyle='#202b25';ctx.fillRect(camX,camY,W,H);
- // moody ground tiles
- for(let y=Math.floor(camY/48)*48;y<camY+H+48;y+=48)for(let x=Math.floor(camX/48)*48;x<camX+W+48;x+=48){ctx.fillStyle=((Math.floor(x/48)+Math.floor(y/48))%2)?'#26312a':'#29332b';ctx.fillRect(x,y,47,47);if((x*7+y*3)%11===0){ctx.fillStyle='#34382d';ctx.fillRect(x+13,y+24,4,2)}}
- // cracked path
- ctx.strokeStyle='#45453a';ctx.lineWidth=72;ctx.beginPath();ctx.moveTo(830,1300);ctx.bezierCurveTo(780,1050,1000,930,900,750);ctx.bezierCurveTo(800,600,950,460,900,300);ctx.stroke();
- ctx.strokeStyle='#555044';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(830,1300);ctx.bezierCurveTo(780,1050,1000,930,900,750);ctx.bezierCurveTo(800,600,950,460,900,300);ctx.stroke();
- obstacles.forEach(o=>{if(o.t==='tree')drawTree(o.x,o.y,1.15);else drawRuin(o.x,o.y,o.w,o.h)});
- // ruined campfire
- ellipse(900,575,24,10,'#151714');ellipse(900,570,10,7,'#9e4e2b');ellipse(900,567,5,8,'#d69a4d');for(let i=0;i<6;i++){let a=i*Math.PI/3;ctx.strokeStyle='#4b3d2d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(900+Math.cos(a)*8,575+Math.sin(a)*5);ctx.lineTo(900+Math.cos(a+1)*17,575+Math.sin(a+1)*7);ctx.stroke();}
- // entities sorted by y
- let entities=[...npcs.filter(n=>n.x>camX-100&&n.x<camX+W+100).map(n=>({...n,renderType:'npc'})),...enemies.filter(e=>e.hp>0).map(e=>({...e,renderType:e.type})),{...player,renderType:'player'}].sort((a,b)=>a.y-b.y);
- entities.forEach(e=>{if(e.renderType==='npc'){drawCharacter(e.x,e.y,'player',.9);ctx.fillStyle='#d8c99e';ctx.font='13px Georgia';ctx.textAlign='center';ctx.fillText(e.name.split(',')[0],e.x,e.y-43);}else drawCharacter(e.x,e.y,e.renderType,e.renderType==='troll'?1.5:1,player.dir);});
- // ambient ground fog
- ctx.globalAlpha=.13;for(let i=0;i<7;i++){let fx=camX+(i*257+performance.now()*.008)%(W+180)-80;let fy=camY+(i*139+Math.sin(performance.now()*.0004+i)*35)%(H+100);ellipse(fx,fy,100,26,'#aab3a0')}ctx.globalAlpha=1;
- ctx.restore();
- // darkness vignette and softened edges
- let grad=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.18,W/2,H/2,Math.max(W,H)*.7);grad.addColorStop(0,'#05070600');grad.addColorStop(1,'#050706d9');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
- if(player.inv>0){ctx.fillStyle='#a23b3022';ctx.fillRect(0,0,W,H)}
- // tiny film grain
- for(let i=0;i<70;i++){let x=(i*137+performance.now()*.03)%W,y=(i*79)%H;ctx.fillStyle='#e4dec0';ctx.globalAlpha=.045;ctx.fillRect(x,y,1,1)}ctx.globalAlpha=1;
-}
-let last=performance.now();function loop(now){let dt=Math.min(.035,(now-last)/1000);last=now;update(dt);render();requestAnimationFrame(loop)}updateQuest();requestAnimationFrame(loop);
+(()=>{'use strict';
+const c=document.querySelector('#game'),g=c.getContext('2d',{alpha:false});const VW=480,VH=270; c.width=VW;c.height=VH;g.imageSmoothingEnabled=false;
+const world={w:1500,h:1100},p={x:750,y:650,hp:100,dir:0,attack:0,dodge:0,inv:0,step:0};let souls=0,quest=0,dialogOpen=false,started=false,toastT=0,clock=0;
+const npcs=[{x:785,y:520,name:'Maëlys',role:'sentinelle'},{x:1040,y:725,name:'Orven',role:'marchand'}];
+const enemies=[{x:560,y:455,type:'squelette',hp:42,max:42,speed:25,aggro:155,hit:0},{x:990,y:460,type:'squelette',hp:42,max:42,speed:27,aggro:160,hit:0},{x:1180,y:870,type:'troll',hp:125,max:125,speed:15,aggro:195,hit:0},{x:430,y:825,type:'squelette',hp:42,max:42,speed:24,aggro:150,hit:0},{x:1280,y:580,type:'squelette',hp:42,max:42,speed:22,aggro:150,hit:0}];
+const trees=[];let seed=1729;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}for(let i=0;i<110;i++){let x=rand()*world.w,y=rand()*world.h;if(Math.hypot(x-750,y-650)>115)trees.push({x,y,s:.65+rand()*.7})}
+const ruins=[{x:650,y:520,w:40,h:28},{x:895,y:430,w:48,h:32},{x:910,y:600,w:31,h:45},{x:570,y:700,w:36,h:25},{x:1090,y:650,w:45,h:29},{x:830,y:330,w:28,h:38},{x:1000,y:930,w:48,h:28}];
+const keys={};addEventListener('keydown',e=>{let k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(!keys[k]){if(k===' '&&started&&!dialogOpen)attack();if(k==='e'&&started)interact();if(k==='shift'&&started&&!dialogOpen&&p.dodge<=0)p.dodge=.22;}keys[k]=true});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.querySelector('#begin').onclick=()=>{started=true;document.querySelector('#start').style.display='none';notify('Les Terres Oubliées');};
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function move(o,dx,dy){o.x=Math.max(22,Math.min(world.w-22,o.x+dx));o.y=Math.max(22,Math.min(world.h-22,o.y+dy))}
+function notify(t){let el=document.querySelector('#toast');el.textContent=t;el.style.opacity=1;toastT=2}
+function updateQuest(){document.querySelector('#questtext').textContent=['Parlez à Maëlys, près du feu mourant.','Chassez les squelettes des ruines. ( '+enemies.filter(e=>e.type==='squelette'&&e.hp>0).length+' restants )','Retournez voir Maëlys.','Explorez les terres maudites. Le sanctuaire attend au nord.'][Math.min(quest,3)]}
+function showDialog(title,text,cb){dialogOpen=true;document.querySelector('#dialog').style.display='block';document.querySelector('#dtitle').textContent=title;document.querySelector('#dtext').textContent=text;document.querySelector('#dnext').onclick=()=>{document.querySelector('#dialog').style.display='none';dialogOpen=false;if(cb)cb()}}
+function interact(){if(dialogOpen){document.querySelector('#dnext').click();return}let n=npcs.find(x=>dist(p,x)<62);if(n){if(n.role==='sentinelle'){if(quest===0)showDialog('Maëlys, la sentinelle','« Enfin un vivant... Les cloches ont réveillé les morts. Trois squelettes rôdent près des ruines. Détruisez-les et je vous dirai pourquoi le roi a condamné ces terres. »',()=>{quest=1;updateQuest();notify('Nouvelle quête : Les morts sans repos')});else if(quest===1)showDialog('Maëlys','« Ils sont encore là. Ne confondez pas courage et imprudence. Frappez, puis reculez. »');else if(quest===2)showDialog('Maëlys','« Je vous croyais déjà dévoré par la brume. Le roi cherchait à enfermer quelque chose sous le sanctuaire. Il a échoué. Prenez ces éclats et suivez le chemin vers le nord. »',()=>{souls+=25;document.querySelector('#souls').textContent=souls;quest=3;updateQuest();notify('25 éclats anciens obtenus')});else showDialog('Maëlys','« Le sanctuaire se trouve au nord. Si vous entendez votre nom dans la brume, ne répondez pas. »')}else showDialog('Orven, le marchand','« Plus d’or, plus de gardes, plus de roi. Il me reste quelques histoires — et elles sont toutes mauvaises. »');return}let e=enemies.find(x=>x.hp>0&&dist(p,x)<65);if(e)notify(e.type==='troll'?'Un troll colossal. Sa peau ressemble à la roche.':'Des os animés par une magie ancienne.');else notify('Le vent murmure entre les pierres...')}
+function attack(){if(p.attack>0)return;p.attack=.26;let count=0;for(const e of enemies){if(e.hp<=0||dist(p,e)>64)continue;let a=Math.atan2(e.y-p.y,e.x-p.x),diff=Math.atan2(Math.sin(a-p.dir),Math.cos(a-p.dir));if(Math.abs(diff)>1.65)continue;e.hp-=e.type==='troll'?20:32;e.hit=.3;count++;if(e.hp<=0){souls+=e.type==='troll'?15:5;document.querySelector('#souls').textContent=souls;notify(e.type==='troll'?'Le troll s’effondre dans la poussière.':'Les os retombent en poussière.')}}if(count===0)notify('Votre lame fend la brume.');if(quest===1&&enemies.filter(e=>e.type==='squelette'&&e.hp>0).length===0){quest=2;notify('Objectif accompli : retournez voir Maëlys.')}updateQuest()}
+function update(dt){clock+=dt;if(!started)return;if(!dialogOpen){let dx=0,dy=0;if(keys.w||keys.z||keys.arrowup)dy--;if(keys.s||keys.arrowdown)dy++;if(keys.a||keys.q||keys.arrowleft)dx--;if(keys.d||keys.arrowright)dx++;if(dx||dy){let l=Math.hypot(dx,dy);dx/=l;dy/=l;p.dir=Math.atan2(dy,dx);let sp=p.dodge>0?360:100;move(p,dx*sp*dt,dy*sp*dt);p.step+=dt*12}}
+p.attack=Math.max(0,p.attack-dt);p.dodge=Math.max(0,p.dodge-dt);p.inv=Math.max(0,p.inv-dt);
+for(const e of enemies){if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);let d=dist(p,e);if(d<e.aggro&&d>27&&!dialogOpen){move(e,(p.x-e.x)/d*e.speed*dt,(p.y-e.y)/d*e.speed*dt)}if(d<30&&e.hit<=0&&p.inv<=0){p.hp=Math.max(0,p.hp-(e.type==='troll'?17:9));p.inv=.8;e.hit=.85;document.querySelector('#hpnum').textContent=p.hp;document.querySelector('#hp').style.width=p.hp+'%';if(p.hp===0)showDialog('La brume vous réclame','Vous tombez. Le royaume n’a pas encore livré ses secrets.',()=>{p.hp=100;p.x=750;p.y=650;enemies.forEach(x=>{x.hp=x.max});document.querySelector('#hpnum').textContent=100;document.querySelector('#hp').style.width='100%';quest=0;updateQuest()})}}
+if(toastT>0&&(toastT-=dt)<=0)document.querySelector('#toast').style.opacity=0}
+function poly(a,col,stroke){g.beginPath();a.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.fillStyle=col;g.fill();if(stroke){g.strokeStyle=stroke;g.stroke()}}
+function oval(x,y,rx,ry,col){g.fillStyle=col;g.beginPath();g.ellipse(x,y,rx,ry,0,0,Math.PI*2);g.fill()}
+function tree(x,y,s){oval(x,y+2*s,10*s,3*s,'#090e0bcc');poly([[x-2*s,y],[x-2*s,y-15*s],[x+2*s,y-17*s],[x+3*s,y]],'#332b24');poly([[x,y-28*s],[x-12*s,y-9*s],[x+12*s,y-9*s]],'#17271f');poly([[x,y-21*s],[x-14*s,y-4*s],[x+14*s,y-4*s]],'#24352a');poly([[x,y-15*s],[x-11*s,y-1*s],[x+11*s,y-1*s]],'#31402e')}
+function ruin(o){g.fillStyle='#090d0b88';g.fillRect(o.x-o.w/2+2,o.y-o.h+3,o.w,o.h);g.fillStyle='#48483b';g.fillRect(o.x-o.w/2,o.y-o.h,o.w,o.h);g.fillStyle='#30352c';g.fillRect(o.x-o.w/2+3,o.y-o.h+3,o.w-6,o.h-4);g.fillStyle='#66604b';g.fillRect(o.x-o.w/2,o.y-o.h,o.w,3)}
+function actor(x,y,type,scale=1,dir=0,hp=1,max=1){oval(x,y+3*scale,8*scale,3*scale,'#05070699');if(type==='player'){g.save();g.translate(x,y);poly([[-6,0],[-5,-12],[0,-17],[6,-12],[7,0]],p.inv>0?'#a95c52':'#414943','#888779');poly([[-5,-12],[-4,-18],[0,-23],[5,-18],[6,-12]],'#252b28','#8b8978');oval(0,-18,4,4,'#b1ad97');poly([[-4,-20],[0,-26],[4,-20]],'#76786d');g.strokeStyle='#c5bda2';g.lineWidth=1.7;g.beginPath();g.moveTo(5,-7);g.lineTo(11,-19);g.stroke();if(p.attack>0){g.strokeStyle='#e6d7a5';g.lineWidth=2;g.beginPath();g.arc(0,-6,23,-1.45,.85);g.stroke()}g.restore()}else if(type==='squelette'){oval(x,y-11,5,6,'#b5b09a');oval(x-2,y-12,1.3,2,'#292d27');oval(x+2,y-12,1.3,2,'#292d27');poly([[x-5,y-5],[x+5,y-5],[x+4,y+3],[x-4,y+3]],'#77796a');g.strokeStyle='#c1b79d';g.lineWidth=1.2;g.beginPath();g.moveTo(x+4,y-2);g.lineTo(x+10,y-11);g.stroke()}else if(type==='troll'){poly([[x-10,y+2],[x-9,y-12],[x-5,y-20],[x+5,y-20],[x+11,y-9],[x+9,y+3]],'#4c5944','#7c7d5d');oval(x,y-19,7,5,'#667153');oval(x-2,y-20,1,1,'#e3b86a');oval(x+3,y-20,1,1,'#e3b86a')}
+if(type!=='player'){g.fillStyle='#171511';g.fillRect(x-8,y-27*scale,16*scale,2);g.fillStyle='#a84337';g.fillRect(x-8,y-27*scale,16*scale*Math.max(0,hp/max),2)}}
+function render(){let camX=Math.max(0,Math.min(world.w-VW,p.x-VW/2)),camY=Math.max(0,Math.min(world.h-VH,p.y-VH/2));g.fillStyle='#202b23';g.fillRect(0,0,VW,VH);g.save();g.translate(-Math.floor(camX),-Math.floor(camY));
+for(let y=Math.floor(camY/24)*24;y<camY+VH+24;y+=24)for(let x=Math.floor(camX/24)*24;x<camX+VW+24;x+=24){g.fillStyle=((x/24|0)+(y/24|0))%2?'#27332a':'#2a342a';g.fillRect(x,y,23,23);if(((x*7+y*11)%13)<2){g.fillStyle='#3b4031';g.fillRect(x+5,y+12,2,1)}}
+g.strokeStyle='#484638';g.lineWidth=32;g.beginPath();g.moveTo(720,1100);g.quadraticCurveTo(790,830,750,680);g.quadraticCurveTo(710,520,790,300);g.stroke();g.strokeStyle='#5b5441';g.lineWidth=1;g.stroke();
+for(const t of trees)if(t.x>camX-20&&t.x<camX+VW+20&&t.y>camY-30&&t.y<camY+VH+30)tree(t.x,t.y,t.s);
+for(const r of ruins)ruin(r);
+oval(785,535,18,6,'#11130e');for(let i=0;i<4;i++){g.strokeStyle='#594431';g.lineWidth=2;g.beginPath();g.moveTo(780+i*3,535);g.lineTo(785+i*2,531);g.stroke()}oval(785,531,3,5,'#d98b3e');oval(785,529,1.5,3,'#f3c86d');
+let ents=[...npcs.map(n=>({...n,t:'npc'})),...enemies.filter(e=>e.hp>0).map(e=>({...e,t:e.type})),{...p,t:'player'}].sort((a,b)=>a.y-b.y);for(const e of ents){if(e.x<camX-30||e.x>camX+VW+30||e.y<camY-40||e.y>camY+VH+40)continue;if(e.t==='npc'){actor(e.x,e.y,'player',.85);g.fillStyle='#e0d0a3';g.font='7px Georgia';g.textAlign='center';g.fillText(e.name,e.x,e.y-31);if(dist(p,e)<62){g.fillStyle='#e4d09a';g.fillText('[E] PARLER',e.x,e.y-39)}}else actor(e.x,e.y,e.t,e.t==='troll'?1.5:1,p.dir,e.hp,e.max)}
+// fog drifting through the clearing
+for(let i=0;i<7;i++){let x=(i*91+clock*5)%(VW+60)-30+camX,y=(i*47+Math.sin(clock*.4+i)*10)+camY;oval(x,y,30,5,'#b7c0ad0c')}
+g.restore();let v=g.createRadialGradient(VW/2,VH/2,45,VW/2,VH/2,220);v.addColorStop(0,'#05070600');v.addColorStop(1,'#050706c9');g.fillStyle=v;g.fillRect(0,0,VW,VH);if(p.inv>0){g.fillStyle='#9b292922';g.fillRect(0,0,VW,VH)}for(let i=0;i<180;i++){g.globalAlpha=.025;g.fillStyle='#e4dec0';g.fillRect((i*67+Math.floor(clock*12))%VW,(i*41)%VH,1,1)}g.globalAlpha=1}
+let last=performance.now();function loop(now){let dt=Math.min(.04,(now-last)/1000);last=now;update(dt);render();requestAnimationFrame(loop)}updateQuest();requestAnimationFrame(loop);
 })();
 </script></body></html>
